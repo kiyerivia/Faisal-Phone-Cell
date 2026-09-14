@@ -54,6 +54,11 @@
   "build": {
     "appId": "com.faisalphonecell.app",
     "productName": "Faisal Phone Cell",
+    "publish": {
+      "provider": "github",
+      "owner": "kiyerivia",
+      "repo": "Faisal-Phone-Cell"
+    },
     "directories": {
       "output": "release"
     },
