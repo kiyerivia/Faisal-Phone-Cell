@@ -1,0 +1,79 @@
+{
+  "name": "faisal-phone-cell",
+  "version": "1.0.1",
+  "description": "Sistem Manajemen Stok Sparepart & Servisan HP Offline-First dengan Cloud Sync",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build:electron": "npx esbuild electron/main.ts --bundle --platform=node --outfile=dist-electron/main.js --external:electron && npx esbuild electron/preload.ts --bundle --platform=node --outfile=dist-electron/preload.js --external:electron",
+    "build": "tsc && vite build && npm run build:electron",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"cross-env NODE_ENV=development electron .\"",
+    "build:win": "npm run build && electron-builder --win --x64"
+  },
+  "keywords": [
+    "inventory",
+    "phone-repair",
+    "sparepart",
+    "pos",
+    "offline-first",
+    "electron",
+    "react"
+  ],
+  "author": "Rivia Developer (Rivia Studio)",
+  "homepage": "https://www.riviadeveloper.com",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "dexie": "^4.0.11",
+    "electron-updater": "^6.8.9",
+    "lucide-react": "^1.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.25.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1"
+  },
+  "build": {
+    "appId": "com.faisalphonecell.app",
+    "productName": "Faisal Phone Cell",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Faisal Phone Cell"
+    }
+  }
+}
