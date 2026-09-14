@@ -29,7 +29,10 @@ win-unpacked
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables and sensitive files
 .env
 .env.*
 !.env.example
+*token*.txt
+*.key
+
