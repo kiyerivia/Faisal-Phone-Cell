@@ -716,10 +716,10 @@ CREATE POLICY "Public Read/Write Movements" ON stock_movements FOR ALL USING (tr
                 Kirim file installer versi baru setiap kali ada penambahan fitur:
               </p>
               <ol className="text-[11px] text-slate-700 dark:text-slate-300 space-y-1.5 list-decimal list-inside">
-                <li>Ubah versi di <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px]">package.json</code> (misal: <span className="font-mono text-teal-700 dark:text-teal-300">1.0.1</span>).</li>
-                <li>Jalankan perintah <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px]">npm run build:win</code>.</li>
-                <li>Ambil file di folder <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px]">release/Faisal Phone Cell Setup 1.0.1.exe</code>.</li>
-                <li>Kirim file ke PC tujuan & install langsung.</li>
+                <li>Cukup jalankan perintah <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px] text-teal-700 dark:text-teal-300 font-bold">npm run deploy</code>.</li>
+                <li>Versi otomatis dinaikkan (<span className="font-mono text-teal-700 dark:text-teal-300">1.0.1 → 1.0.2 → 1.0.3 dst.</span>), lalu otomatis di-commit & di-push ke GitHub.</li>
+                <li>File installer terbaru otomatis terbuat di folder <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px]">release/Faisal Phone Cell Setup [versi].exe</code>.</li>
+                <li>Kirim file installer tersebut ke PC tujuan & install langsung.</li>
               </ol>
               <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />

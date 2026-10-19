@@ -1,6 +1,6 @@
 {
   "name": "faisal-phone-cell",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sistem Manajemen Stok Sparepart & Servisan HP Offline-First dengan Cloud Sync",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite\" \"cross-env NODE_ENV=development electron .\"",
     "build:win": "npm run build && electron-builder --win --x64",
-    "release": "node scripts/release.js"
+    "release": "node scripts/deploy.js",
+    "deploy": "node scripts/deploy.js",
+    "bump": "node scripts/bump.js",
+    "postinstall": "node scripts/setup-hooks.js"
   },
   "keywords": [
     "inventory",
