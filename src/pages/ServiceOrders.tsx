@@ -18,6 +18,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { db } from '../db/database';
+import { syncService } from '../services/syncService';
 import { ServiceOrder, ServiceStatus, SparepartItem, BrandType, UsedPart, StoreSettings } from '../types';
 import { formatRupiah, formatDateIndo, generateServiceOrderNo, cleanPhoneForWA, getWhatsAppServiceMsg } from '../utils/formatters';
 import { printServiceReceipt } from '../utils/receiptPrinter';
@@ -75,6 +76,12 @@ export const ServiceOrders: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    const unsub = syncService.subscribe((status) => {
+      if (!status.isSyncing) {
+        loadData();
+      }
+    });
+    return () => unsub();
   }, []);
 
   const loadData = async () => {
@@ -394,8 +401,19 @@ export const ServiceOrders: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredOrders.length === 0 ? (
           <div className="col-span-full text-center py-16 glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
-            <Wrench className="w-8 h-8 mx-auto text-slate-400 dark:text-slate-600 mb-2" />
-            Tidak ada data servisan yang cocok.
+            <Wrench className="w-9 h-9 mx-auto text-teal-600/50 dark:text-teal-400/50 mb-3" />
+            {orders.length === 0 ? (
+              <div className="space-y-1.5 max-w-md mx-auto">
+                <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  Belum Ada Antrean Servisan HP (Dimulai dari Nol)
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Semua nota dummy telah dibersihkan. Klik tombol <strong className="text-teal-700 dark:text-teal-400">+ Buat Tanda Terima Servis</strong> di atas untuk mencatat penerimaan unit HP baru dari pelanggan toko Anda.
+                </p>
+              </div>
+            ) : (
+              <div>Tidak ada data servisan yang cocok dengan pencarian / filter ini.</div>
+            )}
           </div>
         ) : (
           filteredOrders.map((order) => {

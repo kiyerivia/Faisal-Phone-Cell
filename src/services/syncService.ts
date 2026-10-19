@@ -163,6 +163,43 @@ class SyncService {
         await Promise.all(dirtyMov.map((m) => db.stock_movements.update(m.id, { is_synced: 1 })));
       }
 
+      // 5. Download / Pull latest data from Supabase Cloud into local IndexedDB (Two-Way Sync)
+      try {
+        const [
+          { data: cloudOrders, error: pullOrderErr },
+          { data: cloudParts, error: pullPartErr },
+          { data: cloudTrx, error: pullTrxErr },
+          { data: cloudMov, error: pullMovErr }
+        ] = await Promise.all([
+          this.supabase.from('service_orders').select('*'),
+          this.supabase.from('spareparts').select('*'),
+          this.supabase.from('transactions').select('*'),
+          this.supabase.from('stock_movements').select('*')
+        ]);
+
+        if (pullOrderErr) console.warn('Gagal menarik servisan dari cloud:', pullOrderErr.message);
+        else if (cloudOrders && cloudOrders.length > 0) {
+          await db.service_orders.bulkPut(cloudOrders);
+        }
+
+        if (pullPartErr) console.warn('Gagal menarik sparepart dari cloud:', pullPartErr.message);
+        else if (cloudParts && cloudParts.length > 0) {
+          await db.spareparts.bulkPut(cloudParts);
+        }
+
+        if (pullTrxErr) console.warn('Gagal menarik transaksi dari cloud:', pullTrxErr.message);
+        else if (cloudTrx && cloudTrx.length > 0) {
+          await db.transactions.bulkPut(cloudTrx);
+        }
+
+        if (pullMovErr) console.warn('Gagal menarik pergerakan stok dari cloud:', pullMovErr.message);
+        else if (cloudMov && cloudMov.length > 0) {
+          await db.stock_movements.bulkPut(cloudMov);
+        }
+      } catch (pullErr: any) {
+        console.warn('Peringatan saat mendownload data terbaru dari cloud:', pullErr);
+      }
+
       const nowStr = new Date().toISOString();
       if (settings) {
         settings.last_sync_time = nowStr;

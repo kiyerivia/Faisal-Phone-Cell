@@ -1,12 +1,88 @@
 import { Transaction, ServiceOrder, StoreSettings } from '../types';
 import { formatRupiah, formatDateIndo } from './formatters';
 
-export function printTransactionReceipt(transaction: Transaction, settings: StoreSettings) {
-  const printWindow = window.open('', '_blank', 'width=450,height=650');
-  if (!printWindow) {
-    alert('Pop-up printer diblokir browser. Silakan izinkan pop-up.');
-    return;
+/**
+ * Mencetak dokumen HTML secara langsung menggunakan hidden iframe.
+ * Menghindari blokir pop-up browser & Electron karena tidak membuka jendela baru.
+ */
+export function printHtmlDocument(html: string) {
+  // 1. Prioritas Utama: Cetak lewat iframe tersembunyi (100% bebas dari blokir pop-up)
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    iframe.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (iframeDoc && iframe.contentWindow) {
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
+
+      const runPrint = () => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (e) {
+          console.error('Error saat mencetak via iframe:', e);
+        } finally {
+          setTimeout(() => {
+            try {
+              if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+              }
+            } catch (_) {}
+          }, 3000);
+        }
+      };
+
+      if (iframeDoc.readyState === 'complete') {
+        setTimeout(runPrint, 250);
+      } else {
+        iframe.onload = () => {
+          setTimeout(runPrint, 250);
+        };
+      }
+      return;
+    }
+  } catch (err) {
+    console.warn('Metode iframe tidak didukung, mencoba fallback window.open:', err);
   }
+
+  // 2. Fallback: window.open jika iframe tidak didukung
+  try {
+    const printWindow = window.open('', '_blank', 'width=550,height=750');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        try {
+          printWindow.print();
+        } catch (_) {}
+      }, 300);
+      return;
+    }
+  } catch (e) {
+    console.error('Fallback window.open error:', e);
+  }
+
+  alert(
+    'Pop-up printer diblokir browser atau sistem desktop.\n\n' +
+    'Solusi:\n' +
+    '1. Jika di browser (Chrome/Edge): Klik ikon pop-up di bilah alamat dan pilih "Selalu izinkan pop-up".\n' +
+    '2. Muat ulang halaman lalu coba cetak kembali.'
+  );
+}
+
+export function printTransactionReceipt(transaction: Transaction, settings: StoreSettings) {
 
   const itemsHtml = transaction.items
     .map(
@@ -185,28 +261,14 @@ export function printTransactionReceipt(transaction: Transaction, settings: Stor
         <div class="footer">
           ${settings.receipt_footer}
         </div>
-
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(() => { window.close(); }, 500);
-          }
-        </script>
       </body>
     </html>
   `;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  printHtmlDocument(html);
 }
 
 export function printServiceReceipt(order: ServiceOrder, settings: StoreSettings) {
-  const printWindow = window.open('', '_blank', 'width=480,height=700');
-  if (!printWindow) {
-    alert('Pop-up printer diblokir browser. Silakan izinkan pop-up.');
-    return;
-  }
 
   const partsHtml =
     order.parts_used.length > 0
@@ -371,28 +433,14 @@ export function printServiceReceipt(order: ServiceOrder, settings: StoreSettings
           * Garansi servis 7 hari (syarat segel tidak rusak).<br>
           * Kerusakan jatuh/kena air membatalkan garansi.
         </div>
-
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(() => { window.close(); }, 500);
-          }
-        </script>
       </body>
     </html>
   `;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  printHtmlDocument(html);
 }
 
 export function printA4Invoice(transaction: Transaction, settings: StoreSettings) {
-  const printWindow = window.open('', '_blank', 'width=800,height=900');
-  if (!printWindow) {
-    alert('Pop-up printer diblokir browser. Silakan izinkan pop-up.');
-    return;
-  }
 
   const itemsHtml = transaction.items
     .map(
@@ -586,17 +634,9 @@ export function printA4Invoice(transaction: Transaction, settings: StoreSettings
         <div style="margin-top: 40px; padding-top: 12px; border-top: 1px dashed #cbd5e1; font-size: 10px; color: #64748b; text-align: center;">
           ${settings.receipt_footer}
         </div>
-
-        <script>
-          window.onload = function() {
-            window.print();
-          }
-        </script>
       </body>
     </html>
   `;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  printHtmlDocument(html);
 }

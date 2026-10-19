@@ -333,8 +333,17 @@ export const POS: React.FC = () => {
           {/* Parts Grid */}
           <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 gap-3 content-start">
             {filteredParts.length === 0 ? (
-              <div className="col-span-full py-16 text-center text-slate-400 text-xs">
-                Tidak ada sparepart yang ditemukan atau stok habis.
+              <div className="col-span-full py-16 text-center text-slate-500 dark:text-slate-400 text-xs">
+                {spareparts.length === 0 ? (
+                  <div className="space-y-1.5 max-w-sm mx-auto">
+                    <p className="font-bold text-slate-800 dark:text-slate-200">Katalog Sparepart Masih Kosong</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Belum ada stok barang. Anda bisa input di menu <strong>Katalog Sparepart</strong> atau gunakan tombol <strong>+ Jasa Servis Manual</strong> di samping untuk input transaksi jasa langsung.
+                    </p>
+                  </div>
+                ) : (
+                  'Tidak ada sparepart yang ditemukan atau stok habis.'
+                )}
               </div>
             ) : (
               filteredParts.map((part) => (

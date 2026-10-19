@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite\" \"cross-env NODE_ENV=development electron .\"",
     "build:win": "npm run build && electron-builder --win --x64",
-    "release": "npm run build && electron-builder --win --publish always"
+    "release": "node scripts/release.js"
   },
   "keywords": [
     "inventory",

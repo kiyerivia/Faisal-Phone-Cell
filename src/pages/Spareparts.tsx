@@ -16,8 +16,10 @@ import {
   Boxes
 } from 'lucide-react';
 import { db } from '../db/database';
+import { syncService } from '../services/syncService';
 import { SparepartItem, BrandType, SparepartCategory } from '../types';
 import { formatRupiah, formatDateIndo } from '../utils/formatters';
+import { printHtmlDocument } from '../utils/receiptPrinter';
 
 const BRANDS: BrandType[] = [
   'iPhone / Apple',
@@ -77,6 +79,12 @@ export const Spareparts: React.FC = () => {
 
   useEffect(() => {
     loadItems();
+    const unsub = syncService.subscribe((status) => {
+      if (!status.isSyncing) {
+        loadItems();
+      }
+    });
+    return () => unsub();
   }, []);
 
   const loadItems = async () => {
@@ -216,13 +224,15 @@ export const Spareparts: React.FC = () => {
   };
 
   const handlePrintLabel = (item: SparepartItem) => {
-    const printWin = window.open('', '_blank', 'width=350,height=300');
-    if (!printWin) return;
-    printWin.document.write(`
+    const html = `
+      <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8" />
           <title>Label Part - ${item.sku}</title>
           <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            @page { margin: 0; size: auto; }
             body { font-family: monospace; padding: 8px; width: 60mm; margin: 0 auto; text-align: center; border: 1px dashed #000; }
             .brand { font-size: 10px; font-weight: bold; text-transform: uppercase; }
             .title { font-size: 12px; font-weight: bold; margin: 4px 0; }
@@ -237,13 +247,10 @@ export const Spareparts: React.FC = () => {
           <div class="model">${item.brand} - ${item.phone_model}</div>
           <div class="price">${formatRupiah(item.sell_price)}</div>
           <div class="loc">SKU: ${item.sku} | Rak: ${item.location}</div>
-          <script>
-            window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }
-          </script>
         </body>
       </html>
-    `);
-    printWin.document.close();
+    `;
+    printHtmlDocument(html);
   };
 
   const filteredItems = items.filter((item) => {
@@ -400,8 +407,20 @@ export const Spareparts: React.FC = () => {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-slate-500 dark:text-slate-400 text-xs">
-                    Tidak ada sparepart yang sesuai dengan filter atau pencarian Anda.
+                  <td colSpan={8} className="text-center py-14 text-slate-500 dark:text-slate-400 text-xs">
+                    {items.length === 0 ? (
+                      <div className="space-y-2 py-4">
+                        <Layers className="w-10 h-10 mx-auto text-teal-600/50 dark:text-teal-400/50" />
+                        <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                          Katalog Sparepart Masih Kosong (Dimulai dari Nol)
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-xs leading-relaxed">
+                          Semua dummy sparepart telah dibersihkan. Klik tombol <strong className="text-teal-700 dark:text-teal-400">+ Tambah Sparepart Baru</strong> di atas untuk mulai memasukkan stok sparepart asli toko Anda.
+                        </p>
+                      </div>
+                    ) : (
+                      'Tidak ada sparepart yang sesuai dengan filter atau pencarian Anda.'
+                    )}
                   </td>
                 </tr>
               ) : (

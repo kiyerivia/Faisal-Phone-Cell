@@ -8,7 +8,7 @@ import { POS } from './pages/POS';
 import { StockManagement } from './pages/StockManagement';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
-import { seedInitialData } from './db/database';
+import { db, seedInitialData } from './db/database';
 import { syncService } from './services/syncService';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -19,6 +19,16 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const initApp = async () => {
       try {
+        // Pembersihan otomatis satu kali: Bersihkan semua katalog dummy & orderan lama agar toko mulai dari nol
+        const CLEANUP_KEY = 'fpc_cleared_dummy_zero_v1';
+        if (!localStorage.getItem(CLEANUP_KEY)) {
+          await db.spareparts.clear();
+          await db.service_orders.clear();
+          await db.transactions.clear();
+          await db.stock_movements.clear();
+          localStorage.setItem(CLEANUP_KEY, 'true');
+        }
+
         await seedInitialData();
         await syncService.initClient();
       } catch (err) {

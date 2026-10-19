@@ -88,10 +88,21 @@ function createWindow() {
     }
   });
 
-  // Make all links open with external browser
+  // Make external links open in user's default browser, but allow internal/blank print windows
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:') || url.startsWith('http:') || url.startsWith('mailto:') || url.startsWith('wa.me')) {
       shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    if (url === 'about:blank' || url === '' || url.startsWith('blob:')) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          autoHideMenuBar: true,
+          width: 500,
+          height: 700,
+        }
+      };
     }
     return { action: 'deny' };
   });

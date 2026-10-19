@@ -31,6 +31,7 @@ import { db, DEFAULT_SETTINGS, seedInitialData } from '../db/database';
 import { StoreSettings } from '../types';
 import { syncService } from '../services/syncService';
 import { useTheme } from '../context/ThemeContext';
+import logoImg from '../assets/logo.png';
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme, setTheme } = useTheme();
@@ -226,14 +227,14 @@ export const Settings: React.FC = () => {
     reader.readAsText(file);
   };
 
-  const handleResetData = async () => {
-    if (confirm('PERINGATAN: Ini akan mereset seluruh database kembali ke data awal demo. Semua data transaksi dan servisan baru akan dihapus. Lanjutkan?')) {
+  const handleClearAllData = async () => {
+    if (confirm('PERINGATAN PENTING:\n\nApakah Anda yakin ingin MENGHAPUS SEMUA data katalog sparepart, nota antrean servisan, transaksi kasir, dan histori mutasi stok?\n\nSemua data operasional akan dikosongkan agar Anda dapat mulai menggunakan sistem dari nol.\n\nLanjutkan?')) {
       await db.spareparts.clear();
       await db.service_orders.clear();
       await db.transactions.clear();
       await db.stock_movements.clear();
       await seedInitialData();
-      alert('Database telah direset ke data sampel awal.');
+      alert('Seluruh katalog dan orderan telah berhasil dibersihkan! Sistem sekarang bersih dan siap dipakai dari nol.');
       window.location.reload();
     }
   };
@@ -616,11 +617,12 @@ CREATE POLICY "Public Read/Write Movements" ON stock_movements FOR ALL USING (tr
 
             <button
               type="button"
-              onClick={handleResetData}
+              onClick={handleClearAllData}
               className="ml-auto flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-red-50 dark:bg-slate-900 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl border border-red-200 dark:border-red-500/20 text-xs transition-colors"
+              title="Hapus semua barang sparepart, servis, kasir & mutasi untuk memulai dari awal"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Reset ke Data Demo Awal
+              Kosongkan Seluruh Data (Mulai dari Nol)
             </button>
           </div>
         </div>
@@ -752,7 +754,17 @@ CREATE POLICY "Public Read/Write Movements" ON stock_movements FOR ALL USING (tr
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
             <div className="w-20 h-20 rounded-2xl bg-white dark:bg-slate-800 p-2 border border-teal-500/30 flex items-center justify-center shadow-lg shadow-teal-500/10 shrink-0">
-              <img src="/logo.png" alt="Faisal Phone Cell" className="w-full h-full object-contain" />
+              <img 
+                src={logoImg} 
+                alt="Faisal Phone Cell" 
+                className="w-full h-full object-contain" 
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.endsWith('logo.svg')) {
+                    target.src = './logo.svg';
+                  }
+                }}
+              />
             </div>
 
             <div className="flex-1 text-center sm:text-left space-y-2">

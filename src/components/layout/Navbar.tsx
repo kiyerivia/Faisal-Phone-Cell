@@ -17,6 +17,7 @@ import { db } from '../../db/database';
 import { SparepartItem, ServiceOrder, StoreSettings } from '../../types';
 import { formatRupiah } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import logoImg from '../../assets/logo.png';
 
 interface NavbarProps {
   onNavigate: (page: string) => void;
@@ -91,9 +92,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activePage }) => {
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-slate-900/5 dark:bg-slate-800/80 p-1 border border-teal-500/30 flex items-center justify-center shadow-md shadow-teal-500/10 ring-1 ring-teal-400/20 overflow-hidden group">
           <img 
-            src="/logo.png" 
+            src={logoImg} 
             alt="Faisal Phone Cell Logo" 
             className="w-full h-full object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-200" 
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.endsWith('logo.svg')) {
+                target.src = './logo.svg';
+              }
+            }}
           />
         </div>
         <div>
