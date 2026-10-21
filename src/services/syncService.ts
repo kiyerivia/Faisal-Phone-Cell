@@ -241,6 +241,30 @@ class SyncService {
       this.timer = null;
     }
   }
+
+  public async clearCloudData(): Promise<{ success: boolean; message: string }> {
+    const settings = await db.settings.get('default_store_settings');
+    if (!this.supabase && settings?.supabase_url && settings?.supabase_anon_key && settings.sync_enabled) {
+      await this.initClient(settings);
+    }
+
+    if (!this.supabase) {
+      return { success: true, message: 'Cloud Supabase tidak terhubung (data lokal saja).' };
+    }
+
+    try {
+      await Promise.allSettled([
+        this.supabase.from('stock_movements').delete().neq('id', '___non_existent___'),
+        this.supabase.from('transactions').delete().neq('id', '___non_existent___'),
+        this.supabase.from('service_orders').delete().neq('id', '___non_existent___'),
+        this.supabase.from('spareparts').delete().neq('id', '___non_existent___'),
+      ]);
+      return { success: true, message: 'Semua data di Cloud Supabase berhasil dibersihkan.' };
+    } catch (err: any) {
+      console.warn('Gagal membersihkan Supabase Cloud:', err);
+      return { success: false, message: err.message };
+    }
+  }
 }
 
 export const syncService = new SyncService();

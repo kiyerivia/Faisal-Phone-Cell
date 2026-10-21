@@ -1,6 +1,6 @@
 {
   "name": "faisal-phone-cell",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Sistem Manajemen Stok Sparepart & Servisan HP Offline-First dengan Cloud Sync",
   "main": "dist-electron/main.js",
   "scripts": {

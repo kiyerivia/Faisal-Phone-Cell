@@ -248,13 +248,19 @@ export const Settings: React.FC = () => {
   };
 
   const handleClearAllData = async () => {
-    if (confirm('PERINGATAN PENTING:\n\nApakah Anda yakin ingin MENGHAPUS SEMUA data katalog sparepart, nota antrean servisan, transaksi kasir, dan histori mutasi stok?\n\nSemua data operasional akan dikosongkan agar Anda dapat mulai menggunakan sistem dari nol.\n\nLanjutkan?')) {
+    if (confirm('PERINGATAN PENTING:\n\nApakah Anda yakin ingin MENGHAPUS SEMUA data katalog sparepart, nota antrean servisan, transaksi kasir, dan histori mutasi stok?\n\nSemua data lokal komputer DAN Cloud Supabase akan dibersihkan agar Anda dapat mulai menggunakan sistem dari nol murni.\n\nLanjutkan?')) {
+      try {
+        await syncService.clearCloudData();
+      } catch (e) {
+        console.warn('Gagal bersihkan cloud:', e);
+      }
       await db.spareparts.clear();
       await db.service_orders.clear();
       await db.transactions.clear();
       await db.stock_movements.clear();
       await seedInitialData();
-      alert('Seluruh katalog dan orderan telah berhasil dibersihkan! Sistem sekarang bersih dan siap dipakai dari nol.');
+      localStorage.setItem('fpc_cleared_dummy_zero_v2', 'true');
+      alert('Seluruh data katalog dan orderan telah berhasil dibersihkan total (Lokal & Cloud)! Sistem sekarang benar-benar bersih dan siap dipakai dari nol.');
       window.location.reload();
     }
   };

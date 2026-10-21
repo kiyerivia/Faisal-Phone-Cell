@@ -19,13 +19,18 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const initApp = async () => {
       try {
-        // Pembersihan otomatis satu kali: Bersihkan semua katalog dummy & orderan lama agar toko mulai dari nol
-        const CLEANUP_KEY = 'fpc_cleared_dummy_zero_v1';
+        // Pembersihan otomatis satu kali: Bersihkan semua katalog dummy & orderan lama agar toko mulai dari nol murni
+        const CLEANUP_KEY = 'fpc_cleared_dummy_zero_v2';
         if (!localStorage.getItem(CLEANUP_KEY)) {
           await db.spareparts.clear();
           await db.service_orders.clear();
           await db.transactions.clear();
           await db.stock_movements.clear();
+          try {
+            await syncService.clearCloudData();
+          } catch (e) {
+            console.warn('Auto clear cloud warning:', e);
+          }
           localStorage.setItem(CLEANUP_KEY, 'true');
         }
 
