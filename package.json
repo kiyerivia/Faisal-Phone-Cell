@@ -1,6 +1,6 @@
 {
   "name": "faisal-phone-cell",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Sistem Manajemen Stok Sparepart & Servisan HP Offline-First dengan Cloud Sync",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -62,7 +62,8 @@
     "publish": {
       "provider": "github",
       "owner": "kiyerivia",
-      "repo": "Faisal-Phone-Cell"
+      "repo": "Faisal-Phone-Cell",
+      "releaseType": "release"
     },
     "directories": {
       "output": "release"
