@@ -14,6 +14,23 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'] || 'http://localh
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 
+function formatUpdaterError(err: any): string {
+  const msg = err?.message || String(err || '');
+  if (msg.includes('Unable to find latest version on GitHub') || msg.includes('Cannot parse releases feed')) {
+    return 'Belum ada rilis versi resmi di GitHub Releases. Pembaruan online baru akan aktif setelah Anda merilis installer di GitHub.';
+  }
+  if (msg.includes('ERR_INTERNET_DISCONNECTED') || msg.includes('ENOTFOUND') || msg.includes('ERR_CONNECTION_REFUSED')) {
+    return 'Tidak ada koneksi internet. Silakan periksa jaringan komputer Anda.';
+  }
+  if (msg.includes('ERR_TIMED_OUT') || msg.includes('ETIMEDOUT')) {
+    return 'Koneksi ke server update timeout. Silakan periksa koneksi Anda dan coba lagi.';
+  }
+  if (msg.length > 200) {
+    return msg.slice(0, 180) + '... (Gagal membaca response server GitHub)';
+  }
+  return msg || 'Gagal memeriksa pembaruan';
+}
+
 function setupAutoUpdater() {
   autoUpdater.on('checking-for-update', () => {
     win?.webContents.send('updater-event', { status: 'checking', message: 'Memeriksa pembaruan...' });
@@ -52,9 +69,10 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('error', (err) => {
+    const friendlyMessage = formatUpdaterError(err);
     win?.webContents.send('updater-event', {
       status: 'error',
-      message: err?.message || 'Gagal memeriksa pembaruan',
+      message: friendlyMessage,
       error: err
     });
   });
@@ -127,7 +145,7 @@ ipcMain.handle('app:check-update', async () => {
     const result = await autoUpdater.checkForUpdates();
     return { status: 'success', result };
   } catch (err: any) {
-    return { status: 'error', message: err.message };
+    return { status: 'error', message: formatUpdaterError(err) };
   }
 });
 

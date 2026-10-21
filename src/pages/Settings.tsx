@@ -64,12 +64,27 @@ export const Settings: React.FC = () => {
       }).catch(() => {});
     }
 
+    // Helper to sanitize cryptic raw updater errors
+    const cleanUpdaterMsg = (msg?: string) => {
+      if (!msg) return '';
+      if (msg.includes('Unable to find latest version on GitHub') || msg.includes('Cannot parse releases feed')) {
+        return 'Belum ada rilis versi resmi di GitHub Releases. Pembaruan online baru akan aktif setelah Anda merilis installer di GitHub.';
+      }
+      if (msg.includes('ERR_INTERNET_DISCONNECTED') || msg.includes('ENOTFOUND')) {
+        return 'Tidak ada koneksi internet. Silakan periksa jaringan komputer Anda.';
+      }
+      if (msg.length > 200) {
+        return msg.slice(0, 180) + '...';
+      }
+      return msg;
+    };
+
     // Subscribe to electron auto-updater events
     if (window.electronAPI?.onUpdaterEvent) {
       const unsubscribe = window.electronAPI.onUpdaterEvent((data) => {
         setUpdateStatus({
           status: data.status,
-          message: data.message,
+          message: cleanUpdaterMsg(data.message),
           progressPercent: data.progress ? Math.round(data.progress.percent) : undefined,
           info: data.info
         });
@@ -100,9 +115,14 @@ export const Settings: React.FC = () => {
           });
           setIsCheckingUpdate(false);
         } else if (res.status === 'error') {
+          const rawMsg = res.message || 'Gagal memeriksa update';
+          const cleanMsg = (rawMsg.includes('Unable to find latest version on GitHub') || rawMsg.includes('Cannot parse releases feed'))
+            ? 'Belum ada rilis versi resmi di GitHub Releases. Pembaruan online baru akan aktif setelah Anda merilis installer di GitHub.'
+            : (rawMsg.length > 200 ? rawMsg.slice(0, 180) + '...' : rawMsg);
+
           setUpdateStatus({
             status: 'error',
-            message: res.message || 'Gagal memeriksa update (Periksa koneksi internet atau server release).'
+            message: cleanMsg
           });
           setIsCheckingUpdate(false);
         }
@@ -651,11 +671,25 @@ CREATE POLICY "Public Read/Write Movements" ON stock_movements FOR ALL USING (tr
           {/* Interactive Check for Update Area */}
           <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              <div className="space-y-1 max-w-xl">
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   Status Sistem Pembaruan:
+                  {updateStatus.status === 'error' && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20">
+                      Catatan
+                    </span>
+                  )}
+                  {updateStatus.status === 'not-available' && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                      Terbaru
+                    </span>
+                  )}
                 </div>
-                <div className="text-xs text-slate-600 dark:text-slate-400">
+                <div className={`text-xs leading-relaxed ${
+                  updateStatus.status === 'error'
+                    ? 'text-amber-700 dark:text-amber-300'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}>
                   {updateStatus.message || 'Sistem siap memeriksa versi rilis terbaru.'}
                 </div>
               </div>

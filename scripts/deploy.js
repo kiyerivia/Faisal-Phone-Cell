@@ -106,5 +106,11 @@ console.log(`🎉 SUKSES DEPLOY VERSI \x1b[32mv${nextVersion}\x1b[0m`);
 console.log(`📁 File Installer: release/Faisal Phone Cell Setup ${nextVersion}.exe`);
 if (publishSuccess) {
   console.log(`🌐 GitHub Release: https://github.com/kiyerivia/Faisal-Phone-Cell/releases/tag/v${nextVersion}`);
+  console.log(`✨ Auto-update online sudah aktif untuk semua pengguna!`);
+} else {
+  console.log(`\x1b[33m⚠️  CATATAN AUTO-UPDATE ONLINE:\x1b[0m`);
+  console.log(`   Installer offline lokal SUDAH BERHASIL dibuat di folder release/`);
+  console.log(`   Namun upload ke GitHub Releases belum berhasil karena izin token.`);
+  console.log(`   Jalankan: \x1b[36mnpm run check:token\x1b[0m untuk panduan perbaikan token GitHub.`);
 }
 console.log('==================================================\n');
